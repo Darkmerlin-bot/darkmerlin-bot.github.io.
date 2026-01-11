@@ -58,10 +58,13 @@
         .recipe-card:active{transform:scale(0.98)}
         .recipe-card.from-search{border:2px solid var(--sage)}
         .recipe-image{height:140px;background:linear-gradient(135deg,var(--sage),var(--forest-light));display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative}
+        .recipe-image.has-img{background-size:cover;background-position:center}
+        .recipe-image.has-img span{display:none}
         .recipe-badges{position:absolute;top:10px;right:10px;display:flex;gap:6px;flex-wrap:wrap;max-width:70%;justify-content:flex-end}
         .badge{background:rgba(255,255,255,0.95);padding:4px 10px;border-radius:12px;font-size:0.7rem;font-weight:600;color:var(--forest)}
         .badge.carbs{background:var(--terracotta);color:white}
         .badge.ai{background:var(--forest);color:white}
+        .badge.warning{background:var(--warning);color:var(--charcoal)}
         .recipe-content{padding:16px}
         .recipe-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;margin-bottom:8px}
         .recipe-meta{display:flex;gap:16px;color:var(--text-muted);font-size:0.8rem;flex-wrap:wrap}
@@ -71,6 +74,7 @@
         .analysis-value{font-weight:600}
         .analysis-value.good{color:var(--success)}
         .analysis-value.warning{color:var(--warning)}
+        .analysis-value.bad{color:var(--danger)}
         .search-results-info{background:var(--cream);padding:16px;border-radius:var(--radius-md);margin-bottom:16px;display:none}
         .search-results-info.active{display:block}
         .results-title{font-weight:600;color:var(--forest);margin-bottom:8px}
@@ -119,7 +123,7 @@
         .modal-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:600}
         .modal-close{background:var(--cream);border:none;width:36px;height:36px;border-radius:50%;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
         .modal-body{padding:20px;max-height:60vh;overflow-y:auto}
-        .recipe-detail-image{height:180px;background:linear-gradient(135deg,var(--sage),var(--forest-light));border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:4rem;margin-bottom:20px}
+        .recipe-detail-image{height:180px;background:linear-gradient(135deg,var(--sage),var(--forest-light));border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:4rem;margin-bottom:20px;background-size:cover;background-position:center}
         .recipe-detail-badges{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
         .detail-badge{background:var(--cream);padding:8px 14px;border-radius:20px;font-size:0.8rem;font-weight:500;color:var(--forest)}
         .recipe-section{margin-bottom:24px}
@@ -177,25 +181,25 @@
             <div class="search-container">
                 <h3 class="search-title">🔍 Buscar recetas online</h3>
                 <div class="search-form">
-                    <input type="text" class="search-input" id="searchInput" placeholder="Ej: pollo al horno, ensalada...">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Ej: chicken, salad, beef...">
                     <button class="search-btn" id="searchBtn">Buscar</button>
                 </div>
                 <div class="search-suggestions">
-                    <button class="suggestion-chip" data-query="pollo">🍗 Pollo</button>
-                    <button class="suggestion-chip" data-query="ensalada">🥗 Ensalada</button>
-                    <button class="suggestion-chip" data-query="pescado">🐟 Pescado</button>
-                    <button class="suggestion-chip" data-query="carne">🥩 Carne</button>
-                    <button class="suggestion-chip" data-query="huevos">🍳 Huevos</button>
-                    <button class="suggestion-chip" data-query="sopa">🍲 Sopa</button>
+                    <button class="suggestion-chip" data-query="chicken">🍗 Chicken</button>
+                    <button class="suggestion-chip" data-query="salad">🥗 Salad</button>
+                    <button class="suggestion-chip" data-query="fish">🐟 Fish</button>
+                    <button class="suggestion-chip" data-query="beef">🥩 Beef</button>
+                    <button class="suggestion-chip" data-query="egg">🍳 Eggs</button>
+                    <button class="suggestion-chip" data-query="soup">🍲 Soup</button>
                 </div>
             </div>
             <div class="loading-container" id="loadingContainer">
                 <div class="loading-spinner"></div>
                 <p class="loading-text">Buscando y analizando recetas...</p>
                 <div class="loading-steps" id="loadingSteps">
-                    <div class="loading-step" data-step="search"><span>🔍</span><span>Buscando recetas en la web</span></div>
+                    <div class="loading-step" data-step="search"><span>🔍</span><span>Buscando recetas</span></div>
                     <div class="loading-step" data-step="analyze"><span>🧪</span><span>Analizando ingredientes</span></div>
-                    <div class="loading-step" data-step="filter"><span>✅</span><span>Verificando sin gluten y bajo en carbs</span></div>
+                    <div class="loading-step" data-step="filter"><span>✅</span><span>Filtrando sin gluten y bajo en carbs</span></div>
                 </div>
             </div>
             <div class="search-results-info" id="searchResultsInfo">
@@ -268,6 +272,7 @@
     <div class="toast" id="toast"></div>
 
     <script>
+        // Base recipes (20 recetas sin gluten y bajas en carbs)
         const baseRecipes = [
             { id: 1, name: "Huevos revueltos con aguacate", category: "desayuno", time: 15, servings: 2, carbs: 4, calories: 320, emoji: "🥑", isGlutenFree: true, carbsLevel: "low", ingredients: ["4 huevos", "1 aguacate", "2 cdas mantequilla", "Sal y pimienta", "Cebollín"], instructions: ["Bate huevos con sal y pimienta", "Derrite mantequilla a fuego medio-bajo", "Revuelve constantemente", "Retira cremosos", "Sirve con aguacate"] },
             { id: 2, name: "Ensalada César con pollo", category: "almuerzo", time: 25, servings: 2, carbs: 8, calories: 450, emoji: "🥗", isGlutenFree: true, carbsLevel: "low", ingredients: ["2 pechugas de pollo", "1 lechuga romana", "50g parmesano", "Aderezo César sin gluten", "Aceite de oliva"], instructions: ["Sazona y cocina pollo", "Corta lechuga", "Rebana pollo", "Añade parmesano y aderezo"] },
@@ -295,70 +300,435 @@
         const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
         const daysLong = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
         const STORAGE_KEY = 'glutenfree_kitchen_data';
-        const glutenIngredients = ['harina de trigo', 'trigo', 'pan', 'pasta', 'fideos', 'cebada', 'centeno', 'avena', 'cerveza', 'seitán', 'bulgur', 'cuscús', 'galletas', 'pan rallado', 'empanizado', 'tortilla de harina', 'pizza', 'salsa de soja'];
-        const highCarbIngredients = ['papa', 'patata', 'arroz', 'maíz', 'azúcar', 'miel', 'banana', 'plátano', 'uva', 'mango', 'piña', 'frijoles', 'lentejas', 'garbanzos', 'quinoa', 'batata', 'camote', 'yuca'];
-        const emojiMap = { 'pollo': '🍗', 'carne': '🥩', 'cerdo': '🥓', 'pescado': '🐟', 'salmón': '🐟', 'atún': '🐟', 'camarón': '🍤', 'huevo': '🍳', 'ensalada': '🥗', 'sopa': '🍲', 'aguacate': '🥑', 'queso': '🧀', 'default': '🍽️' };
+
+        // Ingredientes con gluten a detectar
+        const glutenIngredients = ['flour', 'wheat', 'bread', 'pasta', 'noodle', 'barley', 'rye', 'oat', 'beer', 'seitan', 'bulgur', 'couscous', 'semolina', 'cracker', 'breadcrumb', 'breaded', 'tortilla', 'pizza', 'soy sauce', 'harina', 'trigo', 'pan', 'fideos', 'cebada', 'centeno', 'avena', 'cerveza', 'galleta', 'empanizado', 'rebozado'];
+        
+        // Ingredientes altos en carbs
+        const highCarbIngredients = ['potato', 'rice', 'corn', 'sugar', 'honey', 'banana', 'grape', 'mango', 'pineapple', 'beans', 'lentil', 'chickpea', 'quinoa', 'sweet potato', 'yuca', 'papa', 'arroz', 'maíz', 'azúcar', 'miel', 'plátano', 'uva', 'piña', 'frijol', 'lenteja', 'garbanzo', 'batata', 'camote'];
+
+        const emojiMap = { 'chicken': '🍗', 'pollo': '🍗', 'beef': '🥩', 'carne': '🥩', 'pork': '🥓', 'cerdo': '🥓', 'fish': '🐟', 'salmon': '🐟', 'tuna': '🐟', 'pescado': '🐟', 'shrimp': '🍤', 'camarón': '🍤', 'egg': '🍳', 'huevo': '🍳', 'salad': '🥗', 'ensalada': '🥗', 'soup': '🍲', 'sopa': '🍲', 'avocado': '🥑', 'aguacate': '🥑', 'cheese': '🧀', 'queso': '🧀', 'default': '🍽️' };
 
         document.addEventListener('DOMContentLoaded', () => { loadData(); renderRecipes(); renderWeekSelector(); renderMealSlots(); renderShoppingList(); setupEventListeners(); });
 
         function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify({ weekMenu, shoppingList, savedRecipes: recipes.filter(r => r.fromSearch), lastUpdated: new Date().toISOString() })); }
-        function loadData() { const saved = localStorage.getItem(STORAGE_KEY); if (saved) { const data = JSON.parse(saved); weekMenu = data.weekMenu || {}; shoppingList = data.shoppingList || []; if (data.savedRecipes) recipes = [...baseRecipes, ...data.savedRecipes]; } }
-        function getRecipeEmoji(name) { const lowerName = name.toLowerCase(); for (const [kw, emoji] of Object.entries(emojiMap)) { if (lowerName.includes(kw)) return emoji; } return emojiMap.default; }
-        function analyzeRecipe(ingredients) { const lowerIngs = ingredients.map(i => i.toLowerCase()); let hasGluten = false, highCarbItems = [], estimatedCarbs = 5; for (const ing of lowerIngs) { for (const g of glutenIngredients) { if (ing.includes(g)) { hasGluten = true; break; } } for (const c of highCarbIngredients) { if (ing.includes(c)) { highCarbItems.push(ing); estimatedCarbs += 15; break; } } } return { isGlutenFree: !hasGluten, highCarbItems, estimatedCarbs: Math.min(estimatedCarbs, 50), carbsLevel: estimatedCarbs <= 15 ? 'low' : estimatedCarbs <= 30 ? 'medium' : 'high' }; }
+        
+        function loadData() { 
+            const saved = localStorage.getItem(STORAGE_KEY); 
+            if (saved) { 
+                const data = JSON.parse(saved); 
+                weekMenu = data.weekMenu || {}; 
+                shoppingList = data.shoppingList || []; 
+                if (data.savedRecipes) recipes = [...baseRecipes, ...data.savedRecipes]; 
+            } 
+        }
+        
+        function getRecipeEmoji(name) { 
+            const lowerName = name.toLowerCase(); 
+            for (const [kw, emoji] of Object.entries(emojiMap)) { 
+                if (lowerName.includes(kw)) return emoji; 
+            } 
+            return emojiMap.default; 
+        }
+        
+        function analyzeRecipe(ingredients) { 
+            const lowerIngs = ingredients.map(i => i.toLowerCase()).join(' '); 
+            let hasGluten = false, highCarbItems = [], estimatedCarbs = 5; 
+            
+            for (const g of glutenIngredients) { 
+                if (lowerIngs.includes(g)) { hasGluten = true; break; } 
+            } 
+            for (const c of highCarbIngredients) { 
+                if (lowerIngs.includes(c)) { highCarbItems.push(c); estimatedCarbs += 15; } 
+            } 
+            
+            return { 
+                isGlutenFree: !hasGluten, 
+                highCarbItems, 
+                estimatedCarbs: Math.min(estimatedCarbs, 50), 
+                carbsLevel: estimatedCarbs <= 15 ? 'low' : estimatedCarbs <= 30 ? 'medium' : 'high' 
+            }; 
+        }
 
+        // Búsqueda usando TheMealDB API (gratuita y sin CORS)
         async function searchRecipes(query) {
             const loadingContainer = document.getElementById('loadingContainer');
             loadingContainer.classList.add('active');
             updateLoadingStep('search');
+            
             try {
-                const response = await fetch("https://api.anthropic.com/v1/messages", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        model: "claude-sonnet-4-20250514",
-                        max_tokens: 4000,
-                        tools: [{ "type": "web_search_20250305", "name": "web_search" }],
-                        messages: [{ role: "user", content: `Busca recetas de "${query}" sin gluten y bajas en carbohidratos (keto). Devuelve SOLO un array JSON: [{"name":"Nombre","category":"almuerzo","time":30,"servings":4,"calories":350,"ingredients":["ing1"],"instructions":["paso1"],"source":"sitio"}]. Busca 4-6 recetas aptas. Solo JSON.` }]
-                    })
-                });
-                updateLoadingStep('analyze');
+                // TheMealDB es una API gratuita sin problemas de CORS
+                const response = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(query)}`);
                 const data = await response.json();
-                let jsonText = ''; for (const block of data.content) { if (block.type === 'text') jsonText += block.text; }
+                
+                updateLoadingStep('analyze');
+                
+                if (!data.meals) {
+                    loadingContainer.classList.remove('active');
+                    showToast('No se encontraron recetas. Probá otro término.', 'error');
+                    return;
+                }
+
                 updateLoadingStep('filter');
-                jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-                const jsonMatch = jsonText.match(/\[[\s\S]*\]/);
-                if (!jsonMatch) throw new Error('No JSON');
-                const foundRecipes = JSON.parse(jsonMatch[0]);
-                const processedRecipes = foundRecipes.map((recipe, i) => {
-                    const analysis = analyzeRecipe(recipe.ingredients);
-                    return { id: Date.now() + i, name: recipe.name, category: recipe.category || 'almuerzo', time: recipe.time || 30, servings: recipe.servings || 4, carbs: analysis.estimatedCarbs, calories: recipe.calories || 350, emoji: getRecipeEmoji(recipe.name), isGlutenFree: analysis.isGlutenFree, carbsLevel: analysis.carbsLevel, highCarbItems: analysis.highCarbItems, ingredients: recipe.ingredients, instructions: recipe.instructions, source: recipe.source, fromSearch: true };
+                
+                // Procesar y analizar cada receta
+                const processedRecipes = data.meals.map((meal, i) => {
+                    // Extraer ingredientes
+                    const ingredients = [];
+                    for (let j = 1; j <= 20; j++) {
+                        const ing = meal[`strIngredient${j}`];
+                        const measure = meal[`strMeasure${j}`];
+                        if (ing && ing.trim()) {
+                            ingredients.push(`${measure ? measure.trim() + ' ' : ''}${ing.trim()}`);
+                        }
+                    }
+                    
+                    // Extraer instrucciones
+                    const instructions = meal.strInstructions
+                        ? meal.strInstructions.split(/\r\n|\n|\r/).filter(s => s.trim().length > 0).slice(0, 8)
+                        : ['Ver instrucciones completas en el enlace'];
+                    
+                    const analysis = analyzeRecipe(ingredients);
+                    
+                    // Determinar categoría basada en tags o categoría de la API
+                    let category = 'almuerzo';
+                    const mealCategory = (meal.strCategory || '').toLowerCase();
+                    if (mealCategory.includes('breakfast') || mealCategory.includes('starter')) category = 'desayuno';
+                    else if (mealCategory.includes('dessert') || mealCategory.includes('side')) category = 'snack';
+                    else if (mealCategory.includes('beef') || mealCategory.includes('pork') || mealCategory.includes('lamb')) category = 'cena';
+                    
+                    return {
+                        id: Date.now() + i,
+                        name: meal.strMeal,
+                        category,
+                        time: 30,
+                        servings: 4,
+                        carbs: analysis.estimatedCarbs,
+                        calories: 350,
+                        emoji: getRecipeEmoji(meal.strMeal),
+                        image: meal.strMealThumb,
+                        isGlutenFree: analysis.isGlutenFree,
+                        carbsLevel: analysis.carbsLevel,
+                        highCarbItems: analysis.highCarbItems,
+                        ingredients,
+                        instructions,
+                        source: meal.strSource || 'TheMealDB',
+                        fromSearch: true
+                    };
                 });
-                searchResults = processedRecipes.filter(r => r.isGlutenFree && r.carbsLevel !== 'high');
-                recipes = [...searchResults, ...baseRecipes];
+                
+                // Filtrar solo las aptas (sin gluten y no alto en carbs)
+                const aptRecipes = processedRecipes.filter(r => r.isGlutenFree && r.carbsLevel !== 'high');
+                const notAptCount = processedRecipes.length - aptRecipes.length;
+                
+                searchResults = aptRecipes;
+                recipes = [...aptRecipes, ...baseRecipes];
+                
                 loadingContainer.classList.remove('active');
                 isSearchMode = true;
+                
                 document.getElementById('searchResultsInfo').classList.add('active');
                 document.getElementById('resultsTitle').textContent = `Resultados para "${query}"`;
-                document.getElementById('resultsDescription').textContent = `${searchResults.length} recetas aptas encontradas.`;
-                renderRecipes(); saveData();
-                showToast(searchResults.length > 0 ? `${searchResults.length} recetas encontradas` : 'No se encontraron recetas aptas', searchResults.length > 0 ? 'success' : '');
-            } catch (error) { console.error(error); loadingContainer.classList.remove('active'); showToast('Error al buscar. Intentá de nuevo.', 'error'); }
+                document.getElementById('resultsDescription').textContent = 
+                    `${aptRecipes.length} recetas aptas encontradas. ${notAptCount > 0 ? `(${notAptCount} descartadas por gluten o carbs altos)` : ''}`;
+                
+                renderRecipes();
+                saveData();
+                
+                showToast(aptRecipes.length > 0 ? `${aptRecipes.length} recetas aptas encontradas` : 'No se encontraron recetas aptas', aptRecipes.length > 0 ? 'success' : '');
+                
+            } catch (error) { 
+                console.error(error); 
+                loadingContainer.classList.remove('active'); 
+                showToast('Error al buscar. Intentá de nuevo.', 'error'); 
+            }
         }
 
-        function updateLoadingStep(currentStep) { const steps = document.querySelectorAll('.loading-step'); let passed = false; steps.forEach(step => { step.classList.remove('done', 'active'); if (step.dataset.step === currentStep) { step.classList.add('active'); passed = true; } else if (!passed) step.classList.add('done'); }); }
-        function renderRecipes(filter = 'all') { const grid = document.getElementById('recipeGrid'); let displayRecipes = isSearchMode ? recipes : baseRecipes; const filtered = filter === 'all' ? displayRecipes : displayRecipes.filter(r => r.category === filter); grid.innerHTML = filtered.map(recipe => `<div class="recipe-card ${recipe.fromSearch ? 'from-search' : ''}" data-id="${recipe.id}"><div class="recipe-image">${recipe.emoji}<div class="recipe-badges"><span class="badge">${recipe.category}</span><span class="badge carbs">${recipe.carbs}g carbs</span>${recipe.fromSearch ? '<span class="badge ai">🔍 Web</span>' : ''}</div></div><div class="recipe-content"><h3 class="recipe-title">${recipe.name}</h3><div class="recipe-meta"><span>⏱️ ${recipe.time} min</span><span>👥 ${recipe.servings}</span><span>🔥 ${recipe.calories} kcal</span></div>${recipe.fromSearch ? `<div class="recipe-analysis"><div class="analysis-item"><span>Gluten:</span><span class="analysis-value good">✓ Libre</span></div><div class="analysis-item"><span>Carbs:</span><span class="analysis-value ${recipe.carbsLevel === 'low' ? 'good' : 'warning'}">${recipe.carbsLevel === 'low' ? '✓ Bajo' : '⚠ Medio'}</span></div></div>` : ''}</div></div>`).join(''); }
-        function renderWeekSelector() { const selector = document.getElementById('weekSelector'); const today = new Date(); const startOfWeek = new Date(today); startOfWeek.setDate(today.getDate() - today.getDay() + 1); selector.innerHTML = days.map((day, i) => { const date = new Date(startOfWeek); date.setDate(startOfWeek.getDate() + i); const dayKey = `day_${i}`; const hasMeals = weekMenu[dayKey] && Object.keys(weekMenu[dayKey]).length > 0; const isSelected = selectedDay === i || (selectedDay === null && i === 0); return `<button class="day-btn ${isSelected ? 'active' : ''} ${hasMeals ? 'has-meals' : ''}" data-day="${i}"><div class="day-name">${day}</div><div class="day-number">${date.getDate()}</div></button>`; }).join(''); if (selectedDay === null) selectedDay = 0; }
-        function renderMealSlots() { const slots = document.getElementById('mealSlots'); const dayKey = `day_${selectedDay}`; const dayMeals = weekMenu[dayKey] || {}; const mealTypes = [{ key: 'desayuno', name: 'Desayuno', icon: '🌅' }, { key: 'almuerzo', name: 'Almuerzo', icon: '☀️' }, { key: 'cena', name: 'Cena', icon: '🌙' }]; slots.innerHTML = mealTypes.map(meal => { const mealData = dayMeals[meal.key]; return `<div class="meal-slot"><div class="meal-slot-header"><span class="meal-type"><span>${meal.icon}</span>${meal.name}</span></div>${mealData ? `<div class="meal-item"><span class="meal-item-name">${mealData.name}</span><button class="remove-meal" data-day="${selectedDay}" data-meal="${meal.key}">×</button></div>` : `<div class="empty-slot">Toca una receta y agrégala aquí</div>`}</div>`; }).join(''); }
-        function renderShoppingList() { const container = document.getElementById('shoppingCategories'); if (shoppingList.length === 0) { container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🛒</div><p class="empty-state-text">Tu lista está vacía.<br>Planifica tu menú y genera la lista.</p></div>`; updateProgress(); return; } const categories = { 'proteínas': { icon: '🥩', items: [] }, 'vegetales': { icon: '🥬', items: [] }, 'lácteos': { icon: '🧀', items: [] }, 'otros': { icon: '🛒', items: [] } }; const proteinKw = ['pollo', 'carne', 'salmón', 'huevo', 'jamón', 'cerdo', 'pescado', 'atún', 'camarón', 'pavo']; const veggieKw = ['lechuga', 'tomate', 'cebolla', 'espárrago', 'espinaca', 'coliflor', 'pepino', 'aguacate', 'zucchini', 'kale', 'pimiento', 'calabacín', 'apio', 'calabaza']; const dairyKw = ['queso', 'mantequilla', 'crema', 'leche', 'parmesano', 'feta']; shoppingList.forEach(item => { const name = item.name.toLowerCase(); if (proteinKw.some(k => name.includes(k))) categories['proteínas'].items.push(item); else if (veggieKw.some(k => name.includes(k))) categories['vegetales'].items.push(item); else if (dairyKw.some(k => name.includes(k))) categories['lácteos'].items.push(item); else categories['otros'].items.push(item); }); container.innerHTML = Object.entries(categories).filter(([_, cat]) => cat.items.length > 0).map(([name, cat]) => `<div class="shopping-category"><div class="category-header"><span class="category-icon">${cat.icon}</span>${name.charAt(0).toUpperCase() + name.slice(1)}</div><div class="shopping-items">${cat.items.map(item => `<div class="shopping-item ${item.checked ? 'checked' : ''}" data-id="${item.id}"><div class="checkbox"><span class="checkbox-icon">✓</span></div><div class="item-name">${item.name}</div></div>`).join('')}</div></div>`).join(''); updateProgress(); }
-        function updateProgress() { const total = shoppingList.length; const checked = shoppingList.filter(i => i.checked).length; const percent = total > 0 ? (checked / total) * 100 : 0; document.getElementById('progressFill').style.width = `${percent}%`; document.getElementById('progressText').textContent = `${checked} de ${total} items`; }
-        function setupEventListeners() { document.querySelectorAll('.nav-tab').forEach(tab => { tab.addEventListener('click', () => { document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); tab.classList.add('active'); document.getElementById(tab.dataset.tab).classList.add('active'); }); }); document.querySelectorAll('.filter-chip').forEach(chip => { chip.addEventListener('click', () => { document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active')); chip.classList.add('active'); renderRecipes(chip.dataset.filter); }); }); document.getElementById('searchBtn').addEventListener('click', () => { const query = document.getElementById('searchInput').value.trim(); if (query) searchRecipes(query); }); document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') { const query = e.target.value.trim(); if (query) searchRecipes(query); } }); document.querySelectorAll('.suggestion-chip').forEach(chip => { chip.addEventListener('click', () => { document.getElementById('searchInput').value = chip.dataset.query; searchRecipes(chip.dataset.query); }); }); document.getElementById('clearSearchBtn').addEventListener('click', () => { isSearchMode = false; document.getElementById('searchResultsInfo').classList.remove('active'); document.getElementById('searchInput').value = ''; renderRecipes(); }); document.getElementById('recipeGrid').addEventListener('click', (e) => { const card = e.target.closest('.recipe-card'); if (card) openRecipeModal(parseInt(card.dataset.id)); }); document.getElementById('weekSelector').addEventListener('click', (e) => { const btn = e.target.closest('.day-btn'); if (btn) { selectedDay = parseInt(btn.dataset.day); renderWeekSelector(); renderMealSlots(); } }); document.getElementById('mealSlots').addEventListener('click', (e) => { if (e.target.classList.contains('remove-meal')) { const day = e.target.dataset.day, meal = e.target.dataset.meal; if (weekMenu[`day_${day}`]) { delete weekMenu[`day_${day}`][meal]; saveData(); renderMealSlots(); renderWeekSelector(); showToast('Receta eliminada'); } } }); document.getElementById('closeModal').addEventListener('click', closeRecipeModal); document.getElementById('recipeModal').addEventListener('click', (e) => { if (e.target.id === 'recipeModal') closeRecipeModal(); }); document.getElementById('addToMenuBtn').addEventListener('click', () => { closeRecipeModal(); openDaySelectModal(); }); document.getElementById('closeDayModal').addEventListener('click', closeDaySelectModal); document.getElementById('daySelectModal').addEventListener('click', (e) => { if (e.target.id === 'daySelectModal') closeDaySelectModal(); }); document.getElementById('mealSelectBtns').addEventListener('click', (e) => { const btn = e.target.closest('.meal-select-btn'); if (btn && selectedDay !== null && currentRecipe) { const mealType = btn.dataset.meal, dayKey = `day_${selectedDay}`; if (!weekMenu[dayKey]) weekMenu[dayKey] = {}; weekMenu[dayKey][mealType] = { id: currentRecipe.id, name: currentRecipe.name, ingredients: currentRecipe.ingredients }; saveData(); closeDaySelectModal(); renderWeekSelector(); renderMealSlots(); showToast(`${currentRecipe.name} agregado`, 'success'); } }); document.getElementById('generateListBtn').addEventListener('click', generateShoppingList); document.getElementById('shoppingCategories').addEventListener('click', (e) => { const item = e.target.closest('.shopping-item'); if (item) { const listItem = shoppingList.find(i => i.id === item.dataset.id); if (listItem) { listItem.checked = !listItem.checked; saveData(); renderShoppingList(); } } }); document.getElementById('addItemBtn').addEventListener('click', addManualItem); document.getElementById('addItemInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') addManualItem(); }); }
-        function openRecipeModal(id) { currentRecipe = recipes.find(r => r.id === id); if (!currentRecipe) return; document.getElementById('modalTitle').textContent = currentRecipe.name; let alertHtml = ''; if (currentRecipe.fromSearch && currentRecipe.highCarbItems?.length > 0) { alertHtml = `<div class="gluten-alert"><span class="gluten-alert-icon">⚠️</span><div class="gluten-alert-text"><div class="gluten-alert-title">Ingredientes con más carbohidratos</div>${currentRecipe.highCarbItems.join(', ')}</div></div>`; } document.getElementById('modalBody').innerHTML = `<div class="recipe-detail-image">${currentRecipe.emoji}</div>${alertHtml}<div class="recipe-detail-badges"><span class="detail-badge">⏱️ ${currentRecipe.time} min</span><span class="detail-badge">👥 ${currentRecipe.servings} porc.</span><span class="detail-badge">🔥 ${currentRecipe.calories} kcal</span><span class="detail-badge">🍞 ${currentRecipe.carbs}g carbs</span>${currentRecipe.source ? `<span class="detail-badge">📍 ${currentRecipe.source}</span>` : ''}</div><div class="recipe-section"><h4 class="recipe-section-title">Ingredientes</h4><ul class="ingredients-list">${currentRecipe.ingredients.map(i => `<li>${i}</li>`).join('')}</ul></div><div class="recipe-section"><h4 class="recipe-section-title">Preparación</h4><ol class="instructions-list">${currentRecipe.instructions.map((inst, i) => `<li><span class="step-number">${i + 1}</span><span>${inst}</span></li>`).join('')}</ol></div>`; document.getElementById('recipeModal').classList.add('active'); }
+        function updateLoadingStep(currentStep) { 
+            const steps = document.querySelectorAll('.loading-step'); 
+            let passed = false; 
+            steps.forEach(step => { 
+                step.classList.remove('done', 'active'); 
+                if (step.dataset.step === currentStep) { step.classList.add('active'); passed = true; } 
+                else if (!passed) step.classList.add('done'); 
+            }); 
+        }
+        
+        function renderRecipes(filter = 'all') { 
+            const grid = document.getElementById('recipeGrid'); 
+            let displayRecipes = isSearchMode ? recipes : baseRecipes; 
+            const filtered = filter === 'all' ? displayRecipes : displayRecipes.filter(r => r.category === filter); 
+            
+            grid.innerHTML = filtered.map(recipe => {
+                const imageStyle = recipe.image ? `background-image:url('${recipe.image}')` : '';
+                const imageClass = recipe.image ? 'has-img' : '';
+                
+                return `<div class="recipe-card ${recipe.fromSearch ? 'from-search' : ''}" data-id="${recipe.id}">
+                    <div class="recipe-image ${imageClass}" style="${imageStyle}">
+                        <span>${recipe.emoji}</span>
+                        <div class="recipe-badges">
+                            <span class="badge">${recipe.category}</span>
+                            <span class="badge carbs">${recipe.carbs}g carbs</span>
+                            ${recipe.fromSearch ? '<span class="badge ai">🌐 Web</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="recipe-content">
+                        <h3 class="recipe-title">${recipe.name}</h3>
+                        <div class="recipe-meta">
+                            <span>⏱️ ${recipe.time} min</span>
+                            <span>👥 ${recipe.servings}</span>
+                            <span>🔥 ${recipe.calories} kcal</span>
+                        </div>
+                        ${recipe.fromSearch ? `<div class="recipe-analysis">
+                            <div class="analysis-item"><span>Gluten:</span><span class="analysis-value good">✓ Libre</span></div>
+                            <div class="analysis-item"><span>Carbs:</span><span class="analysis-value ${recipe.carbsLevel === 'low' ? 'good' : 'warning'}">${recipe.carbsLevel === 'low' ? '✓ Bajo' : '⚠ Medio'}</span></div>
+                        </div>` : ''}
+                    </div>
+                </div>`;
+            }).join(''); 
+        }
+        
+        function renderWeekSelector() { 
+            const selector = document.getElementById('weekSelector'); 
+            const today = new Date(); 
+            const startOfWeek = new Date(today); 
+            startOfWeek.setDate(today.getDate() - today.getDay() + 1); 
+            
+            selector.innerHTML = days.map((day, i) => { 
+                const date = new Date(startOfWeek); 
+                date.setDate(startOfWeek.getDate() + i); 
+                const dayKey = `day_${i}`; 
+                const hasMeals = weekMenu[dayKey] && Object.keys(weekMenu[dayKey]).length > 0; 
+                const isSelected = selectedDay === i || (selectedDay === null && i === 0); 
+                return `<button class="day-btn ${isSelected ? 'active' : ''} ${hasMeals ? 'has-meals' : ''}" data-day="${i}"><div class="day-name">${day}</div><div class="day-number">${date.getDate()}</div></button>`; 
+            }).join(''); 
+            if (selectedDay === null) selectedDay = 0; 
+        }
+        
+        function renderMealSlots() { 
+            const slots = document.getElementById('mealSlots'); 
+            const dayKey = `day_${selectedDay}`; 
+            const dayMeals = weekMenu[dayKey] || {}; 
+            const mealTypes = [{ key: 'desayuno', name: 'Desayuno', icon: '🌅' }, { key: 'almuerzo', name: 'Almuerzo', icon: '☀️' }, { key: 'cena', name: 'Cena', icon: '🌙' }]; 
+            
+            slots.innerHTML = mealTypes.map(meal => { 
+                const mealData = dayMeals[meal.key]; 
+                return `<div class="meal-slot"><div class="meal-slot-header"><span class="meal-type"><span>${meal.icon}</span>${meal.name}</span></div>${mealData ? `<div class="meal-item"><span class="meal-item-name">${mealData.name}</span><button class="remove-meal" data-day="${selectedDay}" data-meal="${meal.key}">×</button></div>` : `<div class="empty-slot">Toca una receta y agrégala aquí</div>`}</div>`; 
+            }).join(''); 
+        }
+        
+        function renderShoppingList() { 
+            const container = document.getElementById('shoppingCategories'); 
+            if (shoppingList.length === 0) { 
+                container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🛒</div><p class="empty-state-text">Tu lista está vacía.<br>Planifica tu menú y genera la lista.</p></div>`; 
+                updateProgress(); 
+                return; 
+            } 
+            
+            const categories = { 'proteínas': { icon: '🥩', items: [] }, 'vegetales': { icon: '🥬', items: [] }, 'lácteos': { icon: '🧀', items: [] }, 'otros': { icon: '🛒', items: [] } }; 
+            const proteinKw = ['pollo', 'carne', 'salmón', 'huevo', 'jamón', 'cerdo', 'pescado', 'atún', 'camarón', 'pavo', 'chicken', 'beef', 'pork', 'fish', 'egg', 'shrimp', 'turkey', 'salmon', 'tuna']; 
+            const veggieKw = ['lechuga', 'tomate', 'cebolla', 'espárrago', 'espinaca', 'coliflor', 'pepino', 'aguacate', 'zucchini', 'kale', 'pimiento', 'calabacín', 'apio', 'calabaza', 'lettuce', 'tomato', 'onion', 'asparagus', 'spinach', 'cauliflower', 'cucumber', 'avocado', 'pepper', 'celery']; 
+            const dairyKw = ['queso', 'mantequilla', 'crema', 'leche', 'parmesano', 'feta', 'cheese', 'butter', 'cream', 'milk']; 
+            
+            shoppingList.forEach(item => { 
+                const name = item.name.toLowerCase(); 
+                if (proteinKw.some(k => name.includes(k))) categories['proteínas'].items.push(item); 
+                else if (veggieKw.some(k => name.includes(k))) categories['vegetales'].items.push(item); 
+                else if (dairyKw.some(k => name.includes(k))) categories['lácteos'].items.push(item); 
+                else categories['otros'].items.push(item); 
+            }); 
+            
+            container.innerHTML = Object.entries(categories).filter(([_, cat]) => cat.items.length > 0).map(([name, cat]) => `<div class="shopping-category"><div class="category-header"><span class="category-icon">${cat.icon}</span>${name.charAt(0).toUpperCase() + name.slice(1)}</div><div class="shopping-items">${cat.items.map(item => `<div class="shopping-item ${item.checked ? 'checked' : ''}" data-id="${item.id}"><div class="checkbox"><span class="checkbox-icon">✓</span></div><div class="item-name">${item.name}</div></div>`).join('')}</div></div>`).join(''); 
+            updateProgress(); 
+        }
+        
+        function updateProgress() { 
+            const total = shoppingList.length; 
+            const checked = shoppingList.filter(i => i.checked).length; 
+            const percent = total > 0 ? (checked / total) * 100 : 0; 
+            document.getElementById('progressFill').style.width = `${percent}%`; 
+            document.getElementById('progressText').textContent = `${checked} de ${total} items`; 
+        }
+        
+        function setupEventListeners() { 
+            document.querySelectorAll('.nav-tab').forEach(tab => { 
+                tab.addEventListener('click', () => { 
+                    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); 
+                    document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); 
+                    tab.classList.add('active'); 
+                    document.getElementById(tab.dataset.tab).classList.add('active'); 
+                }); 
+            }); 
+            
+            document.querySelectorAll('.filter-chip').forEach(chip => { 
+                chip.addEventListener('click', () => { 
+                    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active')); 
+                    chip.classList.add('active'); 
+                    renderRecipes(chip.dataset.filter); 
+                }); 
+            }); 
+            
+            document.getElementById('searchBtn').addEventListener('click', () => { 
+                const query = document.getElementById('searchInput').value.trim(); 
+                if (query) searchRecipes(query); 
+            }); 
+            
+            document.getElementById('searchInput').addEventListener('keypress', (e) => { 
+                if (e.key === 'Enter') { 
+                    const query = e.target.value.trim(); 
+                    if (query) searchRecipes(query); 
+                } 
+            }); 
+            
+            document.querySelectorAll('.suggestion-chip').forEach(chip => { 
+                chip.addEventListener('click', () => { 
+                    document.getElementById('searchInput').value = chip.dataset.query; 
+                    searchRecipes(chip.dataset.query); 
+                }); 
+            }); 
+            
+            document.getElementById('clearSearchBtn').addEventListener('click', () => { 
+                isSearchMode = false; 
+                document.getElementById('searchResultsInfo').classList.remove('active'); 
+                document.getElementById('searchInput').value = ''; 
+                renderRecipes(); 
+            }); 
+            
+            document.getElementById('recipeGrid').addEventListener('click', (e) => { 
+                const card = e.target.closest('.recipe-card'); 
+                if (card) openRecipeModal(parseInt(card.dataset.id)); 
+            }); 
+            
+            document.getElementById('weekSelector').addEventListener('click', (e) => { 
+                const btn = e.target.closest('.day-btn'); 
+                if (btn) { selectedDay = parseInt(btn.dataset.day); renderWeekSelector(); renderMealSlots(); } 
+            }); 
+            
+            document.getElementById('mealSlots').addEventListener('click', (e) => { 
+                if (e.target.classList.contains('remove-meal')) { 
+                    const day = e.target.dataset.day, meal = e.target.dataset.meal; 
+                    if (weekMenu[`day_${day}`]) { delete weekMenu[`day_${day}`][meal]; saveData(); renderMealSlots(); renderWeekSelector(); showToast('Receta eliminada'); } 
+                } 
+            }); 
+            
+            document.getElementById('closeModal').addEventListener('click', closeRecipeModal); 
+            document.getElementById('recipeModal').addEventListener('click', (e) => { if (e.target.id === 'recipeModal') closeRecipeModal(); }); 
+            document.getElementById('addToMenuBtn').addEventListener('click', () => { closeRecipeModal(); openDaySelectModal(); }); 
+            document.getElementById('closeDayModal').addEventListener('click', closeDaySelectModal); 
+            document.getElementById('daySelectModal').addEventListener('click', (e) => { if (e.target.id === 'daySelectModal') closeDaySelectModal(); }); 
+            
+            document.getElementById('mealSelectBtns').addEventListener('click', (e) => { 
+                const btn = e.target.closest('.meal-select-btn'); 
+                if (btn && selectedDay !== null && currentRecipe) { 
+                    const mealType = btn.dataset.meal, dayKey = `day_${selectedDay}`; 
+                    if (!weekMenu[dayKey]) weekMenu[dayKey] = {}; 
+                    weekMenu[dayKey][mealType] = { id: currentRecipe.id, name: currentRecipe.name, ingredients: currentRecipe.ingredients }; 
+                    saveData(); closeDaySelectModal(); renderWeekSelector(); renderMealSlots(); 
+                    showToast(`${currentRecipe.name} agregado`, 'success'); 
+                } 
+            }); 
+            
+            document.getElementById('generateListBtn').addEventListener('click', generateShoppingList); 
+            
+            document.getElementById('shoppingCategories').addEventListener('click', (e) => { 
+                const item = e.target.closest('.shopping-item'); 
+                if (item) { 
+                    const listItem = shoppingList.find(i => i.id === item.dataset.id); 
+                    if (listItem) { listItem.checked = !listItem.checked; saveData(); renderShoppingList(); } 
+                } 
+            }); 
+            
+            document.getElementById('addItemBtn').addEventListener('click', addManualItem); 
+            document.getElementById('addItemInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') addManualItem(); }); 
+        }
+        
+        function openRecipeModal(id) { 
+            currentRecipe = recipes.find(r => r.id === id); 
+            if (!currentRecipe) return; 
+            
+            document.getElementById('modalTitle').textContent = currentRecipe.name; 
+            
+            let alertHtml = ''; 
+            if (currentRecipe.fromSearch && currentRecipe.highCarbItems?.length > 0) { 
+                alertHtml = `<div class="gluten-alert"><span class="gluten-alert-icon">⚠️</span><div class="gluten-alert-text"><div class="gluten-alert-title">Ingredientes con más carbohidratos detectados</div>${currentRecipe.highCarbItems.join(', ')} - Podés reducirlos o sustituirlos</div></div>`; 
+            } 
+            
+            const imageStyle = currentRecipe.image ? `background-image:url('${currentRecipe.image}')` : '';
+            
+            document.getElementById('modalBody').innerHTML = `
+                <div class="recipe-detail-image" style="${imageStyle}">${!currentRecipe.image ? currentRecipe.emoji : ''}</div>
+                ${alertHtml}
+                <div class="recipe-detail-badges">
+                    <span class="detail-badge">⏱️ ${currentRecipe.time} min</span>
+                    <span class="detail-badge">👥 ${currentRecipe.servings} porc.</span>
+                    <span class="detail-badge">🔥 ${currentRecipe.calories} kcal</span>
+                    <span class="detail-badge">🍞 ${currentRecipe.carbs}g carbs</span>
+                    ${currentRecipe.fromSearch ? '<span class="detail-badge">✓ Sin gluten</span>' : ''}
+                </div>
+                <div class="recipe-section"><h4 class="recipe-section-title">Ingredientes</h4><ul class="ingredients-list">${currentRecipe.ingredients.map(i => `<li>${i}</li>`).join('')}</ul></div>
+                <div class="recipe-section"><h4 class="recipe-section-title">Preparación</h4><ol class="instructions-list">${currentRecipe.instructions.map((inst, i) => `<li><span class="step-number">${i + 1}</span><span>${inst}</span></li>`).join('')}</ol></div>
+            `; 
+            document.getElementById('recipeModal').classList.add('active'); 
+        }
+        
         function closeRecipeModal() { document.getElementById('recipeModal').classList.remove('active'); }
-        function openDaySelectModal() { const grid = document.getElementById('daySelectGrid'); grid.innerHTML = days.map((day, i) => `<button class="day-select-btn ${selectedDay === i ? 'selected' : ''}" data-day="${i}">${daysLong[i]}</button>`).join(''); grid.querySelectorAll('.day-select-btn').forEach(btn => { btn.addEventListener('click', () => { grid.querySelectorAll('.day-select-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); selectedDay = parseInt(btn.dataset.day); }); }); document.getElementById('daySelectModal').classList.add('active'); }
+        
+        function openDaySelectModal() { 
+            const grid = document.getElementById('daySelectGrid'); 
+            grid.innerHTML = days.map((day, i) => `<button class="day-select-btn ${selectedDay === i ? 'selected' : ''}" data-day="${i}">${daysLong[i]}</button>`).join(''); 
+            grid.querySelectorAll('.day-select-btn').forEach(btn => { 
+                btn.addEventListener('click', () => { 
+                    grid.querySelectorAll('.day-select-btn').forEach(b => b.classList.remove('selected')); 
+                    btn.classList.add('selected'); 
+                    selectedDay = parseInt(btn.dataset.day); 
+                }); 
+            }); 
+            document.getElementById('daySelectModal').classList.add('active'); 
+        }
+        
         function closeDaySelectModal() { document.getElementById('daySelectModal').classList.remove('active'); }
-        function generateShoppingList() { shoppingList = []; const ingredientMap = new Map(); Object.values(weekMenu).forEach(dayMeals => { Object.values(dayMeals).forEach(meal => { if (meal.ingredients) { meal.ingredients.forEach(ing => { const key = ing.toLowerCase(); if (!ingredientMap.has(key)) { ingredientMap.set(key, { id: `item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, name: ing, checked: false }); } }); } }); }); shoppingList = Array.from(ingredientMap.values()); saveData(); renderShoppingList(); showToast(shoppingList.length > 0 ? `Lista generada: ${shoppingList.length} items` : 'Agrega recetas al menú primero', shoppingList.length > 0 ? 'success' : ''); }
-        function addManualItem() { const input = document.getElementById('addItemInput'); const name = input.value.trim(); if (name) { shoppingList.push({ id: `item_${Date.now()}`, name, checked: false }); saveData(); renderShoppingList(); input.value = ''; showToast('Item agregado', 'success'); } }
-        function showToast(message, type = '') { const toast = document.getElementById('toast'); toast.textContent = message; toast.className = 'toast'; if (type) toast.classList.add(type); toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500); }
+        
+        function generateShoppingList() { 
+            shoppingList = []; 
+            const ingredientMap = new Map(); 
+            Object.values(weekMenu).forEach(dayMeals => { 
+                Object.values(dayMeals).forEach(meal => { 
+                    if (meal.ingredients) { 
+                        meal.ingredients.forEach(ing => { 
+                            const key = ing.toLowerCase(); 
+                            if (!ingredientMap.has(key)) { 
+                                ingredientMap.set(key, { id: `item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, name: ing, checked: false }); 
+                            } 
+                        }); 
+                    } 
+                }); 
+            }); 
+            shoppingList = Array.from(ingredientMap.values()); 
+            saveData(); 
+            renderShoppingList(); 
+            showToast(shoppingList.length > 0 ? `Lista generada: ${shoppingList.length} items` : 'Agrega recetas al menú primero', shoppingList.length > 0 ? 'success' : ''); 
+        }
+        
+        function addManualItem() { 
+            const input = document.getElementById('addItemInput'); 
+            const name = input.value.trim(); 
+            if (name) { 
+                shoppingList.push({ id: `item_${Date.now()}`, name, checked: false }); 
+                saveData(); 
+                renderShoppingList(); 
+                input.value = ''; 
+                showToast('Item agregado', 'success'); 
+            } 
+        }
+        
+        function showToast(message, type = '') { 
+            const toast = document.getElementById('toast'); 
+            toast.textContent = message; 
+            toast.className = 'toast'; 
+            if (type) toast.classList.add(type); 
+            toast.classList.add('show'); 
+            setTimeout(() => toast.classList.remove('show'), 2500); 
+        }
     </script>
 </body>
 </html>
